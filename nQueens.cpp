@@ -1,5 +1,6 @@
 #include<iostream> 
 #include<ctime>
+#include<cstdio>
 using namespace std; 
 
 const int MAXN = 50; 
@@ -48,19 +49,61 @@ int nQueens(int n) {
 	return dfs_forward_checking(0);
 }
 
+//=======================================================
+
+int state[MAXN];
+
+bool check(int n, int a) {
+	for (int i = 0; i < n; ++i) {
+		if (state[i] == a || 
+			state[i] == a + n - i || 
+			state[i] == a - n + i)
+			return false;
+	}
+	return true;
+}
+
+int dfs_backtracking(int n) {
+	if (n >= N) {
+		return 1;
+	}
+	int ret = 0;
+	for (int i = 0; i < N; ++i) if (check(n, i)) {
+		state[n] = i;
+		ret += dfs_backtracking(n + 1);
+	}
+	return ret;
+}
+
+
+int nQueens2(int n) {
+	N = n;
+	return dfs_backtracking(0);
+}
+
+
+
 int main() {
+	freopen("nQueens.txt", "w", stdout);
 
 	int n;
-	cout << "Please input n: ";
+	// cout << "Please input n: ";
 	cin >> n;
 
-	for (int i = 1; i < n; ++i) {
+	for (int i = 1; i <= n; ++i) {
 		auto start = clock();
 		int ans = nQueens(i);
 		auto end = clock();
 	
-		cout << i << " " << ans << endl;
-		cout << "Time: " << double(end - start) / CLOCKS_PER_SEC << endl;
+		// cout << i << " " << ans << endl;
+		cout << double(end - start) / CLOCKS_PER_SEC << " ";
+
+		start = clock();
+		ans = nQueens2(i);
+		end = clock();
+	
+		// cout << i << " " << ans << endl;
+		cout << double(end - start) / CLOCKS_PER_SEC << endl;
 	}
 	
 	return 0;
