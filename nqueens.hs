@@ -1,25 +1,26 @@
 
 import Data.List
 
-judge :: Int -> Int -> [Int] -> Int -> Bool
-judge maxn n state a = all f (zip [(n-1), (n-2)..1] state)
-    where f (i, ai) = ai /= a && ai /= a + n - i && ai /= a - n + i
+-- judge :: Int -> Int -> [Int] -> Int -> Bool
+-- judge maxn n state a = all f (zip [(n-1), (n-2)..1] state)
+--     where f (i, ai) = ai /= a && ai /= a + n - i && ai /= a - n + i
 
-back_tracking :: Int -> Int -> [Int] -> Int
-back_tracking maxn n state = if n > maxn then 1 else
-    let avail = filter (judge maxn n state) [1..maxn] in 
-        sum [back_tracking maxn (n + 1) (a:state) | a <- avail]
+-- backTracking :: Int -> Int -> [Int] -> Int
+-- backTracking maxn n state = if n > maxn then 1 else
+--     let avail = filter (judge maxn n state) [1..maxn] in 
+--         sum [backTracking maxn (n + 1) (a:state) | a <- avail]
 
-forwarding :: Int -> Int -> Int -> [[Int]] -> [[Int]]
-forwarding maxn n a ass = [filter (g i) as | (i, as) <- zip [(n+1)..maxn] ass]
-    where 
-        g i ai = ai /= a && ai /= a + n - i && ai /= a - n + i
-        f (i, as) = filter (g i) as
+backTracking 0 state _ = [state]
+backTracking n state as = 
+    foldl' (++) [] [backTracking (n-1) (a:state) (delete a as) | a <- as, judge state a] where
+        judge state a = and [a /= c + i && a /= c - i | (i, c) <- zip [1..] state]
 
-forward_checking :: Int -> Int -> [[Int]] -> Int
-forward_checking _ _ [] = 1
-forward_checking maxn n (as:ass) = 
-    sum [forward_checking maxn (n+1) (forwarding maxn n a ass) | a <- as]
+queens n = backTracking n [] [1..n]
 
-nQueens :: Int -> Int 
-nQueens n = forward_checking n 1 $ replicate n [1..n]
+
+forwardChecking state [] = [state]
+forwardChecking state (as:ass) = 
+    foldl' (++) [] [forwardChecking (a:state) (forwarding a ass) | a <- as] where
+        forwarding a ass = [filter (\c -> (c /= a) && (c /= a + i) && (c /= a - i)) as | (i, as) <- zip [1..] ass]
+
+nQueens n = forwardChecking [] $ replicate n [1..n]
